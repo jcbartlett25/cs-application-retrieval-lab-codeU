@@ -60,8 +60,24 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch or(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+        
+        Map<String, Integer> or = new HashMap<String, Integer>();
+
+        // Add all the values from the previous map
+        for (String searchWord : this.map.keySet()) {
+
+        	or.put(searchWord, map.get(searchWord));
+        }
+
+        for (String searchWord : that.map.keySet()) {
+
+        	Integer relevance1 = this.getRelevance(searchWord);
+        	Integer relevance2 = that.getRelevance(searchWord);
+        	or.put(searchWord, totalRelevance(relevance1,relevance2));
+        }
+
+         WikiSearch orSearch = new WikiSearch(or);
+         return orSearch;
 	}
 	
 	/**
@@ -71,8 +87,22 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch and(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+        
+        Map<String, Integer> and = new HashMap<String, Integer>();
+
+        for(String searchWord : this.map.keySet()) {
+
+        	// Needs to exist and be greater than zero
+        	if (that.getRelevance(searchWord) != null && !that.getRelevance(searchWord).equals(0)) {
+
+        		int relevance1 = this.getRelevance(searchWord);
+	        	int relevance2 = that.getRelevance(searchWord);
+	        	and.put(searchWord, totalRelevance(relevance1,relevance2));
+        	}
+        }
+
+        WikiSearch andSearch = new WikiSearch(and);
+        return andSearch;
 	}
 	
 	/**
@@ -82,8 +112,19 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch minus(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+        
+        Map<String, Integer> minus = new HashMap<String, Integer>();
+
+        for (String searchWord : this.map.keySet()) {
+
+        	if (!that.map.containsKey(searchWord)) {
+
+        		minus.put(searchWord, this.getRelevance(searchWord));
+        	}
+        }
+
+        WikiSearch minusSearch = new WikiSearch(minus);
+        return minusSearch;
 	}
 	
 	/**
@@ -104,8 +145,35 @@ public class WikiSearch {
 	 * @return List of entries with URL and relevance.
 	 */
 	public List<Entry<String, Integer>> sort() {
-        // FILL THIS IN!
-		return null;
+        
+        List<Entry<String, Integer>> sorted = new LinkedList<Entry<String, Integer>>(this.map.entrySet());
+
+        Comparator<Entry<String, Integer>> comparator = getEntryComparator();
+        
+        Collections.sort(sorted, comparator);
+
+        return sorted;
+	}
+
+	private Comparator<Entry<String, Integer>> getEntryComparator() {
+
+		Comparator<Entry<String, Integer>> comparator = new Comparator<Entry<String, Integer>>() {
+
+            @Override
+            public int compare(Entry<String, Integer> thisOne, Entry<String, Integer> thatOne) {
+
+            	if (thisOne.getValue() > thatOne.getValue())
+            		return 1;
+
+            	else if (thisOne.getValue() < thatOne.getValue())
+            		return -1;
+
+            	else
+            		return 0;
+            }
+        };
+
+        return comparator;
 	}
 
 	/**
